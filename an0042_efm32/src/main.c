@@ -95,6 +95,13 @@ __no_init uint32_t vectorTable[47];
  */
 #if defined(__GNUC__)
 #define __no_init
+void * memset(void * _s, int _c, size_t _n) {
+  uint8_t * s = _s;
+  for (size_t i = 0 ; i < _n; i++) {
+    *s++ = _c;
+  }
+  return _s;
+}
 #else
 #pragma location=0x200000dc
 #endif
@@ -253,6 +260,8 @@ int main(void)
 
   /* Start executing command line */
   commandlineLoop();
+
+  return 0;
 }
 
 
