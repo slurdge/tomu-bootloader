@@ -44,6 +44,10 @@
 #define SAMPLE_MAX 6
 #endif
 
+#if defined(__GNUC__)
+#define __root
+#endif
+
 static volatile int currentSample = 0;
 static volatile uint16_t samples[ SAMPLE_MAX ];
 

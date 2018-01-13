@@ -39,7 +39,7 @@ volatile bool CDC_Configured = false;
 
 /* The serial port LINE CODING data structure, used to carry information  */
 /* about serial port baudrate, parity etc. between host and device.       */
-EFM32_PACK_START( 1 )
+SL_PACK_START( 1 )
 typedef struct
 {
   uint32_t    dwDTERate;          /** Baudrate                            */
@@ -48,19 +48,19 @@ typedef struct
   uint8_t     bDataBits;          /** 5, 6, 7, 8 or 16                    */
   uint8_t     dummy;              /** To ensure size is a multiple of 4 bytes.*/
 } __attribute__ ((packed)) cdcLineCoding_TypeDef;
-EFM32_PACK_END()
+SL_PACK_END()
 
 /*
  * The LineCoding variable must be 4-byte aligned as it is used as USB
  * transmit and receive buffer
  */
-EFM32_ALIGN(4)
-EFM32_PACK_START( 1 )
+SL_ALIGN(4)
+SL_PACK_START( 1 )
 cdcLineCoding_TypeDef __attribute__ ((aligned(4))) cdcLineCoding =
 {
   115200, 0, 0, 8, 0
 };
-EFM32_PACK_END()
+SL_PACK_END()
 
 /**************************************************************************//**
  * Called each time the USB device state is changed.

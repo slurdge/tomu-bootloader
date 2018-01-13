@@ -43,7 +43,7 @@
 #define ALIGNMENT(base,align) (((base)+((align)-1))&(~((align)-1)))
 
 /* Packet storage. Double buffered version. */
-#pragma data_alignment=4
+SL_ALIGN(4)
 uint8_t rawPacket[2][ALIGNMENT(sizeof(XMODEM_packet),4)];
 
 /**************************************************************************//**

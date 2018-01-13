@@ -31,7 +31,7 @@
  *
  ******************************************************************************/
 
-EFM32_ALIGN(4)
+SL_ALIGN(4)
 static const USB_DeviceDescriptor_TypeDef deviceDesc __attribute__ ((aligned(4)))=
 {
   .bLength            = USB_DEVICE_DESCSIZE,
@@ -58,7 +58,7 @@ static const USB_DeviceDescriptor_TypeDef deviceDesc __attribute__ ((aligned(4))
                           USB_CDC_ACM_FND_DESCSIZE              + \
                           5 )
 
-EFM32_ALIGN(4)
+SL_ALIGN(4)
 static const uint8_t configDesc[] __attribute__ ((aligned(4)))=
 {
   /*** Configuration descriptor ***/

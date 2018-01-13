@@ -45,6 +45,10 @@
 #include "bootldio.h"
 #include "retargetdebug.h"
 
+#if defined(__GNUC__)
+#define __root
+#endif
+
 /*** Typedef's and defines. ***/
 #define BOOTLOADER_VERSION_STRING "EFM32HG bootloader v1.0"
 
@@ -61,6 +65,10 @@
 #define DEBUG_LOCK_WORD (LOCKBITS_BASE + (127 * 4))
 
 /*** Function prototypes. ***/
+
+#if defined(__GNUC__)
+#define __noreturn
+#endif
 
 __ramfunc __noreturn static void commandlineLoop(  void );
 __ramfunc static void verify( uint32_t start, uint32_t end );
@@ -85,7 +93,11 @@ __no_init uint32_t vectorTable[47];
  * This can safely be omitted if you are rolling your own bootloader.
  * It is placed rigth after the interrupt vector table.
  */
+#if defined(__GNUC__)
+#define __no_init
+#else
 #pragma location=0x200000dc
+#endif
 __no_init uint32_t bootloaderCRC;
 
 /**************************************************************************//**
@@ -227,12 +239,12 @@ int main(void)
 
   /* Print a message to show that we are in bootloader mode */
 
-  BOOTLDIO_printString("\r\n\r\nBOOTLOADER version " BOOTLOADER_VERSION_STRING ", Chip ID " );
+  BOOTLDIO_printString((const uint8_t*)"\r\n\r\nBOOTLOADER version " BOOTLOADER_VERSION_STRING ", Chip ID " );
 
   /* Print the chip ID. This is useful for production tracking */
   BOOTLDIO_printHex(DEVINFO->UNIQUEH);
   BOOTLDIO_printHex(DEVINFO->UNIQUEL);
-  BOOTLDIO_printString("\r\n");
+  BOOTLDIO_printString((const uint8_t*)"\r\n");
 
   /* Figure out correct flash geometry. */
   FLASH_CalcFlashSize();
