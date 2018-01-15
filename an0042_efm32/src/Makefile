@@ -1,20 +1,25 @@
 PACKAGE = bootloader
 
+SDK_PATH  ?= Gecko_SDK
+
 TRGT      ?= arm-none-eabi-
 CC         = $(TRGT)gcc
 CXX        = $(TRGT)g++
 OBJCOPY    = $(TRGT)objcopy
 
-VPATH    = ../EFM32HG/Source/ ../EFM32HG/Source/GCC/ ../usb_gecko/src/ ../emlib/src/
+VPATH    =  $(SDK_PATH)/Device/SiliconLabs/EFM32HG/Source/ \
+            $(SDK_PATH)/Device/SiliconLabs/EFM32HG/Source/GCC \
+			$(SDK_PATH)/middleware/usb_gecko/src/ \
+			$(SDK_PATH)/emlib/src/
 
-LDSCRIPT = ../EFM32HG/Source/GCC/efm32hg.ld
+LDSCRIPT = $(SDK_PATH)/Device/SiliconLabs/EFM32HG/Source/GCC/efm32hg.ld
 
 INC = 
 INC += -I.
-INC += -I../EFM32HG/Include
-INC += -I../CMSIS/Include
-INC += -I../emlib/inc
-INC += -I../usb_gecko/inc
+INC += -I$(SDK_PATH)/Device/SiliconLabs/EFM32HG/Include
+INC += -I$(SDK_PATH)/CMSIS/Include
+INC += -I$(SDK_PATH)/emlib/inc
+INC += -I$(SDK_PATH)/middleware/usb_gecko/inc
 
 OBJ_DIR = .obj
 
@@ -33,7 +38,7 @@ LDFLAGS     = $(ADD_LFLAGS) $(CFLAGS) \
              -Wl,--gc-sections \
              -Wl,--no-warn-mismatch,--script=$(LDSCRIPT),--build-id=none
 
-LIBS = ../CMSIS/Lib/GCC/libarm_cortexM0l_math.a -lgcc
+LIBS = $(SDK_PATH)/CMSIS/Lib/GCC/libarm_cortexM0l_math.a -lgcc
 
 SRC_C = \
 	autobaud.c \
@@ -47,21 +52,21 @@ SRC_C = \
 	xmodem.c
 
 SRC_SL = \
-	../EFM32HG/Source/system_efm32hg.c \
-	../usb_gecko/src/em_usbd.c \
-	../usb_gecko/src/em_usbdch9.c \
-	../usb_gecko/src/em_usbdep.c \
-	../usb_gecko/src/em_usbdint.c \
-	../usb_gecko/src/em_usbhal.c \
-	../usb_gecko/src/em_usbtimer.c \
-	../emlib/src/em_core.c \
-	../emlib/src/em_cmu.c \
-	../emlib/src/em_emu.c \
-	../emlib/src/em_system.c \
-	../emlib/src/em_timer.c
+	system_efm32hg.c \
+	em_usbd.c \
+	em_usbdch9.c \
+	em_usbdep.c \
+	em_usbdint.c \
+	em_usbhal.c \
+	em_usbtimer.c \
+	em_core.c \
+	em_cmu.c \
+	em_emu.c \
+	em_system.c \
+	em_timer.c
 
 SRC_A = \
-	../EFM32HG/Source/GCC/startup_efm32hg.S
+	startup_efm32hg.S
 
 CSOURCES   = $(SRC_C) $(SRC_SL)
 CPPSOURCES = 
@@ -101,7 +106,17 @@ $(OBJ_DIR)/%.o: %.S
 .PHONY: $(CLEAN)
 
 $(CLEAN):
+	$(QUIET) rm -rf $(SDK_PATH)
 	$(QUIET) rm -f $(wildcard $(OBJ_DIR)/*.o)
 	$(QUIET) rm -f $(TARGET) $(PACKAGE).bin $(PACKAGE).symbol
 
-.PHONY: all
+deps:
+	@if [ ! -d $(SDK_PATH) ]; then \
+		wget https://devtools.silabs.com/studio/v4/updates/binary/com.silabs.sdk.gecko_platform.v2.1.feature_root_2.1.0.201712201229-105 -O sdk.zip; \
+		unzip sdk.zip 'developer/sdks/gecko_sdk_suite/v2.1/platform/*' -d $(SDK_PATH)_tmp ; \
+		mv $(SDK_PATH)_tmp/developer/sdks/gecko_sdk_suite/v2.1/platform $(SDK_PATH); \
+		rm -rf $(SDK_PATH)_tmp; \
+		rm -f sdk.zip; \
+	fi
+
+
