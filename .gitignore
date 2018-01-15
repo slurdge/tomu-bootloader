@@ -1,0 +1,3 @@
+syntax: glob
+Gecko_SDK/
+.obj/
