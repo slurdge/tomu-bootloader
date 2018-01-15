@@ -5,6 +5,10 @@ CC         = $(TRGT)gcc
 CXX        = $(TRGT)g++
 OBJCOPY    = $(TRGT)objcopy
 
+VPATH    = ../EFM32HG/Source/ ../EFM32HG/Source/GCC/ ../usb_gecko/src/ ../emlib/src/
+
+LDSCRIPT = ../EFM32HG/Source/GCC/efm32hg.ld
+
 INC = 
 INC += -I.
 INC += -I../EFM32HG/Include
@@ -15,7 +19,6 @@ INC += -I../usb_gecko/inc
 OBJ_DIR = .obj
 
 CFLAGS_CORTEX_M = -mthumb -mfloat-abi=soft -mcpu=cortex-m0plus
-LDSCRIPT = ../EFM32HG/Source/GCC/efm32hg.ld
 
 CFLAGS = $(INC) -Wall -Wpointer-arith -Werror -std=gnu99 $(CFLAGS_CORTEX_M) $(CFLAGS_EXTRA)
 
@@ -60,9 +63,13 @@ SRC_SL = \
 SRC_A = \
 	../EFM32HG/Source/GCC/startup_efm32hg.S
 
-SRC_ALL = $(SRC_C) $(SRC_SL)
-
-OBJECTS=$(SRC_ALL:.c=.o) $(SRC_A:.S=.o)
+CSOURCES   = $(SRC_C) $(SRC_SL)
+CPPSOURCES = 
+ASOURCES   = $(SRC_A)
+COBJS      = $(addprefix $(OBJ_DIR)/, $(notdir $(CSOURCES:.c=.o)))
+CXXOBJS    = $(addprefix $(OBJ_DIR)/, $(notdir $(CPPSOURCES:.cpp=.o)))
+AOBJS      = $(addprefix $(OBJ_DIR)/, $(notdir $(ASOURCES:.S=.o)))
+OBJECTS = $(COBJS) $(CXXOBJS) $(AOBJS)
 
 ALL        = all
 TARGET     = $(PACKAGE).elf
@@ -79,7 +86,22 @@ $(TARGET): $(OBJECTS) $(LDSCRIPT)
 	$(QUIET) echo "  OBJCOPY  $(PACKAGE).bin"
 	$(QUIET) $(OBJCOPY) -O binary $@ $(PACKAGE).bin
 
+$(COBJS) : $(OBJ_DIR)/%.o : %.c Makefile
+	$(QUIET) echo "  CC       $<	$(notdir $@)"
+	$(QUIET) $(CC) -c $< $(CFLAGS) -o $@
+
+$(OBJ_DIR)/%.o: %.cpp
+	$(QUIET) echo "  CXX      $<	$(notdir $@)"
+	$(QUIET) $(CXX) -c $< $(CXXFLAGS) -o $@
+
+$(OBJ_DIR)/%.o: %.S
+	$(QUIET) echo "  AS       $<	$(notdir $@)"
+	$(QUIET) $(CC) -x assembler-with-cpp -c $< $(CFLAGS) -o $@
+
+.PHONY: $(CLEAN)
+
 $(CLEAN):
-	$(QUIET) rm *.o $(PACKAGE).bin $(PACKAGE).elf
+	$(QUIET) rm -f $(wildcard $(OBJ_DIR)/*.o)
+	$(QUIET) rm -f $(TARGET) $(PACKAGE).bin $(PACKAGE).symbol
 
 .PHONY: all
